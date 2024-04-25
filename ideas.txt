@@ -1,0 +1,16 @@
+Covid deterministic simulation
+    Matrix with:
+        Different stages with different symptoms, transmission and death rates
+            S:  
+            I1: Initial infection   - High death rate and low transmission rate
+            I2: Fever               - High death rate and high transmission Rate
+            I3: Final stage         - Low transmission rate and low death rate
+            R:  Recovered/vaccinated, but can still reinfect
+            D: 
+        Different age group
+            Y: Young people - Fast recovery - mostly from I1 to R
+            A: Adults 
+            E: Elderly
+
+Similar malaria simulation
+    Change different age groups to different genetics
