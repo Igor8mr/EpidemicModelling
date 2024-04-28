@@ -3,12 +3,14 @@ tmax = day * 10; % Duration of the simulation (s).
 clockmax = 400 ;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
-a = 900/day;
-b = 0.5/day;
-deltaInf = 0.1/day;
-deltaHealth = deltaInf / 2; 
-betaHealth = .2/day; % birthrate for healthy
-betaInf     = betaHealth*.75  ;% birthrate for ill 
+
+%% 2.5 births per death --> 1/2.5 deaths per birth 
+a = 100/day;             % infectivity 
+b = 0.1/day;             % recovery rate 
+betaHealth = .01/day;     % birthrate for healthy
+betaInf = betaHealth* (1/4)  ;% birthrate for ill 
+deltaInf = deltaHealth* (5);      % death rate for infected individuals 
+deltaHealth = 1/2.5 * betaHealth; 
 
 %% Note that betaInf < betaHealth | deltaInf > deltaHealth | 
 % ... betaHealth > deltaHealth | deltaInf > betaInf
@@ -39,9 +41,9 @@ hN = plot(0, N, 'm', 'linewidth', 2);
 
 drawnow
 
-legend({'S','I','R', 'D'},'Location','northeast')
+legend({'S','I','R', 'D', 'N'},'Location','northeast')
 
-axis([0, tmax, 0, 10 * N])
+axis([0, tmax, 0, 1.02])
 %% ds/dt = -a(ptrans)*S + betaHealth*S + betaInf*I - deltaHealth*S
 %% di/dt = a(ptrans)*S - betaInf*I - deltaInf*S
 %% N = S + I + R 
@@ -75,19 +77,19 @@ for clock=1:clockmax
     
     % Update tsave, Ssave, Isave, Rsave, Dsave
     tsave(clock) = t; 
-    Ssave(clock) = S;
-    Isave(clock) = I;
-    Rsave(clock) = R;
-    Dsave(clock) = D;
-    Nsave(clock) = N;
+    Ssave(clock) = S/N;
+    Isave(clock) = I/N;
+    Rsave(clock) = R/N;
+    Dsave(clock) = D/N;
+    % Nsave(clock) = N;
 
-    
+    check = (S+I+R) / N
     % Update the plots
     set(hS, 'XData', tsave(1:clock), 'YData', Ssave(1:clock));
     set(hI, 'XData', tsave(1:clock), 'YData', Isave(1:clock));
     set(hR, 'XData', tsave(1:clock), 'YData', Rsave(1:clock));
     set(hD, 'XData', tsave(1:clock), 'YData', Dsave(1:clock));
-    set(hN, 'XData', tsave(1:clock), 'YData', Nsave(1:clock));
+    % set(hN, 'XData', tsave(1:clock), 'YData', Nsave(1:clock));
 
     
     drawnow update; % Update the plot

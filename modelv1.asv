@@ -3,12 +3,14 @@ tmax = day * 10; % Duration of the simulation (s).
 clockmax = 400 ;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
-a = 500/day;
-b = 0.5/day;
-deltaInf = 0.1/day;
-deltaHealth = deltaInf / 2; 
-betaHealth = .2/day; % birthrate for healthy
-betaInf     = betaHealth*.75  ;% birthrate for ill 
+
+%% 2.5 births per death --> 1/2.5 deaths per birth 
+a = 4/day;             % infectivity 
+b = 0.1/day;             % recovery rate 
+betaHealth = .01/day;     % birthrate for healthy
+betaInf = betaHealth*.75  ;% birthrate for ill 
+deltaInf = betaHealth*.75 * 0.1/day;      % death rate for infected individuals 
+deltaHealth = 1/2.5 * betaHealth; 
 
 %% Note that betaInf < betaHealth | deltaInf > deltaHealth | 
 % ... betaHealth > deltaHealth | deltaInf > betaInf
@@ -24,6 +26,8 @@ Ssave = zeros(1,clockmax);
 Isave = zeros(1,clockmax);
 Rsave = zeros(1,clockmax);
 Dsave = zeros(1,clockmax);
+Nsave = zeros(1,clockmax);
+
 
 figure;
 hold on;
@@ -32,23 +36,27 @@ hS = plot(0, S, 'g', 'linewidth', 2);
 hI = plot(0, I, 'r', 'linewidth', 2);
 hR = plot(0, R, 'b', 'linewidth', 2);
 hD = plot(0, D, 'k', 'linewidth', 2);
+hN = plot(0, N, 'm', 'linewidth', 2);
+
 
 drawnow
 
 legend({'S','I','R', 'D'},'Location','northeast')
 
-axis([0, tmax, 0, 1.05 * N])
-
-%% ds/dt = -a(ptrans)*S + betaHealth*S + betaInf*I - c*S
-%% di/dt = a(ptrans)*S - betaInf*I - c'*S
-%% N = S + I
+axis([0, tmax, 0, 10 * N])
+%% ds/dt = -a(ptrans)*S + betaHealth*S + betaInf*I - deltaHealth*S
+%% di/dt = a(ptrans)*S - betaInf*I - deltaInf*S
+%% N = S + I + R 
 for clock=1:clockmax
     t = clock*dt; % Updates current time
 
     ptrans = I/N;
     % Calculates new cases of I, R and D
     if S > 0
-        newI = dt*a*ptrans;
+        newI  = dt*a*ptrans;
+        Sbirths = dt * betaHealth * S;
+        Sdie  = dt * deltaHealth* S;
+        Ibirths = dt * betaInf*I;
     else
         newI = 0;
     end
@@ -61,10 +69,11 @@ for clock=1:clockmax
     end
     
     % Calculate final values of variables
-    S = S - newI + betaHealth * S + betaInf*I - deltaHealth*S;
+    S = S - newI + Sbirths + Ibirths - Sdie;
     I = I + newI - newR - newD;
     R = R + newR;
     D = D + newD;
+    N = S + I + R;
     
     % Update tsave, Ssave, Isave, Rsave, Dsave
     tsave(clock) = t; 
@@ -72,12 +81,16 @@ for clock=1:clockmax
     Isave(clock) = I;
     Rsave(clock) = R;
     Dsave(clock) = D;
+    Nsave(clock) = N;
+
     
     % Update the plots
     set(hS, 'XData', tsave(1:clock), 'YData', Ssave(1:clock));
     set(hI, 'XData', tsave(1:clock), 'YData', Isave(1:clock));
     set(hR, 'XData', tsave(1:clock), 'YData', Rsave(1:clock));
     set(hD, 'XData', tsave(1:clock), 'YData', Dsave(1:clock));
+    set(hN, 'XData', tsave(1:clock), 'YData', Nsave(1:clock));
+
     
     drawnow update; % Update the plot
 end
