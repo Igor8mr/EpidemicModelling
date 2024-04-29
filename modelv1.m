@@ -1,115 +1,167 @@
 day      = 60*60*24; % Day length (s).
-tmax     = day * 365; % Duration of the simulation (s).
+tmax     = day * 100; % Duration of the simulation (s).
 clockmax = 400 ;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
-
-%% 2.5 births per death --> 1/2.5 deaths per birth 
-A           = 1/day;  %  infectivity 
-B           = 0.01/day;  %  recovery rate 
+%% Model Parameters
+A           = 1/day;  % infectivity 
+B           = 0.01/day;  % recovery rate 
 
 a           = [A, A/2, 0];
 b           = [B, B/2, B];
 ra          = 0.5;         % reinfection multiplier
 
-betaH  =      0.001/day;         % birthrate for healthy
-betaI     =   betaH * (1/4);     % birthrate for ill 
+betaH       = 0.001/day;   % birthrate for healthy
+betaI       = betaH * (1/4); % birthrate for ill 
 
-deltaH      = betaH;    % Death rate for healthy individuals
+deltaH      = betaH;       % Death rate for healthy individuals
 deltaI      = [deltaH * 5, deltaH * 5 /2,  deltaH * 5]; % Death rate for infected individuals
 
-vr          = 1/day;
-qr          = 1/day
+vr          = 1/day;       % Recovery rate
+qr          = 1/day;       % Quarantine rate
 
-%% Note that betaI < betaH | deltaI > deltaH | 
-% ... betaH > deltaH | deltaI > betaI
-
-%       Non-vaccinated
-%                     Vaccinated
-%                            Quarentined and non-vaccinated
+%% Initial Conditions
 N =     [1000,        0,     0] ; % Total population
 I =     [100,         0,     0] ; % Infected
 S =     [N(1)-I(1),   0,     0] ; % Susceptible 
 R =     [0,           0,     0] ; % Recovered
 D =     [0,           0,     0] ; % Total Deceased
 
-tsave = zeros(1,clockmax);
-Ssave = zeros(1,clockmax);
-Isave = zeros(1,clockmax);
-Rsave = zeros(1,clockmax);
-Dsave = zeros(1,clockmax);
-Vsave = zeros(1,clockmax);
-Nsave = zeros(1,clockmax);
+%% Initialization for Plotting
+tsave = zeros(clockmax, 1);
+Ssave = zeros(clockmax, 3);
+Isave = zeros(clockmax, 3);
+Rsave = zeros(clockmax, 3);
+Dsave = zeros(clockmax, 3);
+Nsave = zeros(clockmax, 3);
 
+%% Create the figure and subplots
 figure;
-hold on;
 
-hS = plot(0, sum(S), 'g', 'linewidth', 2);
-hI = plot(0, sum(I), 'r', 'linewidth', 2);
-hR = plot(0, sum(D), 'b', 'linewidth', 2);
-hD = plot(0, sum(D), 'k', 'linewidth', 2);
-hV = plot(0, sum(V), 'y', 'linewidth', 2);
-hN = plot(0, sum(N), 'm', 'linewidth', 2);
+subplot(2,2,1);
 
-drawnow
+hold on
 
-legend({'S','I','R', 'D', 'V'},'Location','northeast')
+hS1 = plot(tsave(1:clockmax), sum(Ssave(1:clockmax)));
+hI1 = plot(tsave(1:clockmax), sum(Isave(1:clockmax)));
+hR1 = plot(tsave(1:clockmax), sum(Rsave(1:clockmax)));
+hD1 = plot(tsave(1:clockmax), sum(Dsave(1:clockmax)));
 
+legend({'S','I','R', 'D'},'Location','northeast')
 axis([0, tmax, 0, 1.02])
-%% ds/dt = -a(ptrans)*S + betaH*S + betaI*I - deltaH*S
-%% di/dt = a(ptrans)*S - betaI*I - deltaI*S
-%% N = S + I + R 
-for clock=1:clockmax
+title('Subplot 1')
+
+subplot(2,2,2);
+
+hold on
+
+hS2 = plot(tsave(1:clockmax), Ssave(1:clockmax, 1));
+hI2 = plot(tsave(1:clockmax), Isave(1:clockmax, 1));
+hR2 = plot(tsave(1:clockmax), Rsave(1:clockmax, 1));
+hD2 = plot(tsave(1:clockmax), Dsave(1:clockmax, 1));
+
+legend({'S','I','R', 'D'},'Location','northeast')
+axis([0, tmax, 0, 1.02])
+
+
+subplot(2,2,3);
+
+hold on
+
+hS3 = plot(tsave(1:clockmax), Ssave(1:clockmax, 2));
+hI3 = plot(tsave(1:clockmax), Isave(1:clockmax, 2));
+hR3 = plot(tsave(1:clockmax), Rsave(1:clockmax, 2));
+hD3 = plot(tsave(1:clockmax), Dsave(1:clockmax, 2));
+
+legend({'S','I','R', 'D'},'Location','northeast')
+axis([0, tmax, 0, 1.02])
+
+
+subplot(2,2,4);
+
+hold on
+
+hS4 = plot(tsave(1:clockmax), Ssave(1:clockmax, 3));
+hI4 = plot(tsave(1:clockmax), Isave(1:clockmax, 3));
+hR4 = plot(tsave(1:clockmax), Rsave(1:clockmax, 3));
+hD4 = plot(tsave(1:clockmax), Dsave(1:clockmax, 3));
+
+legend({'S','I','R', 'D'},'Location','northeast')
+axis([0, tmax, 0, 1.02])
+title('Subplot 1')
+
+drawnow update;
+
+%% Main Simulation Loop
+for clock = 1:clockmax
     t = clock*dt; % Updates current time
 
-    %% Calculating populational changes
-    ptrans =    (I(1) + I(2)) / (N(1) + N(2));
+    % Calculating populational changes
+    ptrans = (I(1) + I(2)) / (N(1) + N(2));
 
-    Sbirths =   dt * (betaH * (sum(S)+sum(R)) + betaI * sum(I));
-    Sinf =      dt * ptrans * a .* S;
-    Sdie =      dt * deltaH * S;
+    Sbirths = dt * (betaH * (sum(S)+sum(R)) + betaI * sum(I));
+    Sinf = dt * ptrans * a .* S;
+    Sdie = dt * deltaH * S;
 
-    Idie =      dt * deltaI .* I;
+    Idie = dt * deltaI .* I;
 
-    Rnew =      dt * b .* I;
-    Rinf =      dt * ptrans * ra * a .* R;
-    Rdie =      dt * deltaH * R;
+    Rnew = dt * b .* I;
+    Rinf = dt * ptrans * ra * a .* R;
+    Rdie = dt * deltaH * R;
     
-    %% Calculating final values of variables
+    % Calculating final values of variables
     S = S + [Sbirths, 0, 0] - Sdie - Sinf;
     I = I + Sinf + Rinf - Idie - Rnew;
     R = R + Rnew - Rinf - Rdie;
     D = D + Sdie + Idie + Rdie;
 
-    S(1) = S(1) + S(1) * (qr+vr) *  dt;
-    S(3) = S(3) + S(1) * qr *  dt - S(3) * vr * dt;
+    S(1) = S(1) + S(1) * (qr+vr) * dt;
+    S(3) = S(3) + S(1) * qr * dt - S(3) * vr * dt;
     S(2) = S(2) + S(1) * vr * dt + S(3) * vr * dt;
     
     I(1) = I(1) - I(1) * qr * dt;
     I(3) = I(3) + I(1) * qr * dt;
 
-    R(1) = R(1) + R(1) * (qr+vr) *  dt;
-    R(3) = R(3) + R(1) * (ptrans-0.1) * qr *  dt - R(3) * vr * dt;
+    R(1) = R(1) + R(1) * (qr+vr) * dt;
+    R(3) = R(3) + R(1) * (ptrans-0.1) * qr * dt - R(3) * vr * dt;
     R(2) = R(2) + R(1) * vr * dt + R(3) * vr * dt;
 
     N = S + R + I;
     
-    %% Update tsave, Ssave, Isave, Rsave, Dsave
+    % Update tsave, Ssave, Isave, Rsave, Dsave
     tsave(clock) = t; 
-    Ssave(clock) = sum(S) ./ sum(N);
-    Isave(clock) = sum(I) ./ sum(N);
-    Rsave(clock) = sum(R) ./ sum(N);
-    Dsave(clock) = sum(D) ./ sum(N);
-    Vsave(clock) = sum(V) ./ sum(N);
+    Ssave(clock, :) = S ./ N;
+    Isave(clock, :) = I ./ N;
+    Rsave(clock, :) = R ./ N;
+    Dsave(clock, :) = D ./ N;
 
-    %% Update the plots
-    set(hS, 'XData', tsave(1:clock), 'YData', Ssave(1:clock));
-    set(hI, 'XData', tsave(1:clock), 'YData', Isave(1:clock));
-    set(hR, 'XData', tsave(1:clock), 'YData', Rsave(1:clock));
-    set(hD, 'XData', tsave(1:clock), 'YData', Dsave(1:clock));
-    set(hV, 'XData', tsave(1:clock), 'YData', Vsave(1:clock));
+    % Update the plots in the first subplot
+    subplot(2,2,1)
+    set(hS1, 'XData', tsave(1:clock), 'YData', sum(Ssave(1:clock)));
+    set(hI1, 'XData', tsave(1:clock), 'YData', sum(Isave(1:clock)));
+    set(hR1, 'XData', tsave(1:clock), 'YData', sum(Rsave(1:clock)));
+    set(hD1, 'XData', tsave(1:clock), 'YData', sum(Dsave(1:clock)));
 
-    % set(hN, 'XData', tsave(1:clock), 'YData', Nsave(1:clock));
+    % Update the plots in the second subplot
+    subplot(2,2,2)
+    set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 1));
+    set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 1));
+    set(hR2, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 1));
+    set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1));
+
+     % Update the plots in the first subplot
+    subplot(2,2,3)
+    set(hS1, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 2));
+    set(hI1, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 2));
+    set(hR1, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 2));
+    set(hD1, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2));
+
+    % Update the plots in the second subplot
+    subplot(2,2,4)
+    set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 3));
+    set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 3));
+    set(hR2, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 3));
+    set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3));
     
-    drawnow update; % Update the plot
+    drawnow; % Update the plot
 end
