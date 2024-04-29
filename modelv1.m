@@ -8,7 +8,6 @@ dt = tmax/clockmax ;% Calculates the duration of each time step.
 A           = 1/day;  %  infectivity 
 B           = 1/day;  %  recovery rate 
 
-
 a           = [A, A/2, 0];
 b           = [B, B/2, B];
 ra          = 0.5;         % reinfection multiplier
@@ -67,6 +66,7 @@ for clock=1:clockmax
 
     Sbirths =   dt * (betaH * (sum(S)+sum(R)) + betaI * sum(I));
     Sinf =      dt * ptrans * a .* S;
+    Sdie =      dt * deltaH * S;
 
     Idie =      dt * deltaI .* I;
 
@@ -79,6 +79,20 @@ for clock=1:clockmax
     I = I + Sinf + Rinf - Idie - Rnew;
     R = R + Rnew - Rinf - Rdie;
     D = D + Sdie + Idie + Rdie;
+    N = S + I + R + V;
+    
+    %% Update tsave, Ssave, Isave, Rsave, Dsave
+    tsave(clock) = t; 
+    Ssave(clock) = sum(S) ./ sum(N);
+    Isave(clock) = sum(I) ./ sum(N);
+    Rsave(clock) = sum(R) ./ sum(N);
+    Dsave(clock) = sum(D) ./ sum(N);
+    Vsave(clock) = sum(V) ./ sum(N);
+    % Nsave(clock) = N;
+
+    check = (S+I+R+V) ./ N
+
+    %% Update the plots
     set(hS, 'XData', tsave(1:clock), 'YData', Ssave(1:clock));
     set(hI, 'XData', tsave(1:clock), 'YData', Isave(1:clock));
     set(hR, 'XData', tsave(1:clock), 'YData', Rsave(1:clock));
@@ -89,10 +103,3 @@ for clock=1:clockmax
     
     drawnow update; % Update the plot
 end
-
-display(S)
-display(V)
-display(I)
-display(R)
-display(D)
-check = (S+I+R+V) / N
