@@ -89,7 +89,7 @@ for clock=1:clockmax
     I(3) = I(3) + I(1) * qr * dt;
 
     R(1) = R(1) + R(1) * (qr+vr) *  dt;
-    R(3) = R(3) + R(1) * (ptrans-0.1) * qr *  dt - R(3) * vr * dt;
+    R(3) = R(3) + R(1) * 0.5-ptrans) * qr *  dt - R(3) * vr * dt;
     R(2) = R(2) + R(1) * vr * dt + R(3) * vr * dt;
 
     N = S + R + I;
