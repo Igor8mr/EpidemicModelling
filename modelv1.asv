@@ -38,27 +38,59 @@ Nsave = zeros(clockmax, 3);
 %% Create the figure and subplots
 figure;
 
-subplot(1,2,1);
-hold on;
-hS1 = plot(tsave(1:clockmax), Ssave(1:clockmax, 1));
-hI1 = plot(tsave(1:clockmax), Isave(1:clockmax, 1));
-hR1 = plot(tsave(1:clockmax), Rsave(1:clockmax, 1));
-hD1 = plot(tsave(1:clockmax), Dsave(1:clockmax, 1));
+subplot(2,2,1);
 
-legend({'S','I','R', 'D', 'V'},'Location','northeast')
+hold on
+
+hS1 = plot(tsave(1:clockmax), sum(Ssave(1:clockmax)));
+hI1 = plot(tsave(1:clockmax), sum(Isave(1:clockmax)));
+hR1 = plot(tsave(1:clockmax), sum(Rsave(1:clockmax)));
+hD1 = plot(tsave(1:clockmax), sum(Dsave(1:clockmax)));
+
+legend({'S','I','R', 'D'},'Location','northeast')
+axis([0, tmax, 0, 1.02])
+title('Total Population')
+
+subplot(2,2,2);
+
+hold on
+
+hS2 = plot(tsave(1:clockmax), Ssave(1:clockmax, 1));
+hI2 = plot(tsave(1:clockmax), Isave(1:clockmax, 1));
+hR2 = plot(tsave(1:clockmax), Rsave(1:clockmax, 1));
+hD2 = plot(tsave(1:clockmax), Dsave(1:clockmax, 1));
+
+legend({'S','I','R', 'D'},'Location','northeast')
+axis([0, tmax, 0, 1.02])
+
+
+subplot(2,2,3);
+
+hold on
+
+hS3 = plot(tsave(1:clockmax), Ssave(1:clockmax, 2));
+hI3 = plot(tsave(1:clockmax), Isave(1:clockmax, 2));
+hR3 = plot(tsave(1:clockmax), Rsave(1:clockmax, 2));
+hD3 = plot(tsave(1:clockmax), Dsave(1:clockmax, 2));
+
+legend({'S','I','R', 'D'},'Location','northeast')
+axis([0, tmax, 0, 1.02])
+
+
+subplot(2,2,4);
+
+hold on
+
+hS4 = plot(tsave(1:clockmax), Ssave(1:clockmax, 3));
+hI4 = plot(tsave(1:clockmax), Isave(1:clockmax, 3));
+hR4 = plot(tsave(1:clockmax), Rsave(1:clockmax, 3));
+hD4 = plot(tsave(1:clockmax), Dsave(1:clockmax, 3));
+
+legend({'S','I','R', 'D'},'Location','northeast')
 axis([0, tmax, 0, 1.02])
 title('Subplot 1')
 
-subplot(1,2,2);
-hold on;
-hS2 = plot(tsave(1:clockmax), Ssave(1:clockmax, 2));
-hI2 = plot(tsave(1:clockmax), Isave(1:clockmax, 2));
-hR2 = plot(tsave(1:clockmax), Rsave(1:clockmax, 2));
-hD2 = plot(tsave(1:clockmax), Dsave(1:clockmax, 2));
-
-legend({'S','I','R', 'D', 'V'},'Location','northeast')
-axis([0, tmax, 0, 1.02])
-title('Subplot 2')
+drawnow update;
 
 %% Main Simulation Loop
 for clock = 1:clockmax
@@ -104,18 +136,32 @@ for clock = 1:clockmax
     Dsave(clock, :) = D ./ N;
 
     % Update the plots in the first subplot
-    subplot(1,2,1)
-    set(hS1, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, :));
-    set(hI1, 'XData', tsave(1:clock), 'YData', Isave(1:clock, :));
-    set(hR1, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, :));
-    set(hD1, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, :));
+    subplot(2,2,1)
+    set(hS1, 'XData', tsave(1:clock), 'YData', sum(Ssave(1:clock)));
+    set(hI1, 'XData', tsave(1:clock), 'YData', sum(Isave(1:clock)));
+    set(hR1, 'XData', tsave(1:clock), 'YData', sum(Rsave(1:clock)));
+    set(hD1, 'XData', tsave(1:clock), 'YData', sum(Dsave(1:clock)));
 
     % Update the plots in the second subplot
-    subplot(1,2,2)
-    set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 2));
-    set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 2));
-    set(hR2, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 2));
-    set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2));
+    subplot(2,2,2)
+    set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 1));
+    set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 1));
+    set(hR2, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 1));
+    set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1));
+
+     % Update the plots in the first subplot
+    subplot(2,2,3)
+    set(hS1, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 2));
+    set(hI1, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 2));
+    set(hR1, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 2));
+    set(hD1, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2));
+
+    % Update the plots in the second subplot
+    subplot(2,2,4)
+    set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 3));
+    set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 3));
+    set(hR2, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 3));
+    set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3));
     
-    drawnow update; % Update the plot
+    drawnow; % Update the plot
 end

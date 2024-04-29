@@ -49,7 +49,7 @@ hD1 = plot(tsave(1:clockmax), sum(Dsave(1:clockmax)));
 
 legend({'S','I','R', 'D'},'Location','northeast')
 axis([0, tmax, 0, 1.02])
-title('Subplot 1')
+title('Total Population')
 
 subplot(2,2,2);
 
@@ -62,6 +62,8 @@ hD2 = plot(tsave(1:clockmax), Dsave(1:clockmax, 1));
 
 legend({'S','I','R', 'D'},'Location','northeast')
 axis([0, tmax, 0, 1.02])
+title('Not vaccinated')
+
 
 
 subplot(2,2,3);
@@ -75,6 +77,7 @@ hD3 = plot(tsave(1:clockmax), Dsave(1:clockmax, 2));
 
 legend({'S','I','R', 'D'},'Location','northeast')
 axis([0, tmax, 0, 1.02])
+title('Vaccinated')
 
 
 subplot(2,2,4);
@@ -88,7 +91,7 @@ hD4 = plot(tsave(1:clockmax), Dsave(1:clockmax, 3));
 
 legend({'S','I','R', 'D'},'Location','northeast')
 axis([0, tmax, 0, 1.02])
-title('Subplot 1')
+title('Quarentined')
 
 drawnow update;
 
