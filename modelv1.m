@@ -1,6 +1,6 @@
 %% Model Parameters
 day      = 60*60*24; % Day length (s).
-tmax     = day * 100; % Duration of the simulation (s).
+tmax     = day * 50; % Duration of the simulation (s).
 clockmax = 100 ;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
@@ -48,7 +48,7 @@ hI1 = plot(tsave(1:clockmax), sum(Isave(1:clockmax)), 'r', 'LineWidth', 1.5);
 hR1 = plot(tsave(1:clockmax), sum(Rsave(1:clockmax)), 'b', 'LineWidth', 1.5);
 hD1 = plot(tsave(1:clockmax), sum(Dsave(1:clockmax)), 'k', 'LineWidth', 1.5);
 legend({'S','I','R', 'D'},'Location','northeast')
-axis([0, tmax, 0, 1.02])
+axis([0, tmax/day, 0, 1.02])
 title('Total Population')
 
 subplot(2,3,2);
@@ -58,7 +58,7 @@ hI2 = plot(tsave(1:clockmax), Isave(1:clockmax, 1), 'r', 'LineWidth', 1.5);
 hR2 = plot(tsave(1:clockmax), Rsave(1:clockmax, 1), 'b', 'LineWidth', 1.5);
 hD2 = plot(tsave(1:clockmax), Dsave(1:clockmax, 1), 'k', 'LineWidth', 1.5);
 legend({'S','I','R', 'D'},'Location','northeast')
-axis([0, tmax, 0, 1.02])
+axis([0, tmax/day, 0, 1.02])
 title('Not vaccinated')
 
 subplot(2,3,3);
@@ -68,7 +68,7 @@ hI3 = plot(tsave(1:clockmax), Isave(1:clockmax, 2), 'r', 'LineWidth', 1.5);
 hR3 = plot(tsave(1:clockmax), Rsave(1:clockmax, 2), 'b', 'LineWidth', 1.5);
 hD3 = plot(tsave(1:clockmax), Dsave(1:clockmax, 2), 'k', 'LineWidth', 1.5);
 legend({'S','I','R', 'D'},'Location','northeast')
-axis([0, tmax, 0, 1.02])
+axis([0, tmax/day, 0, 1.02])
 title('Vaccinated')
 
 subplot(2,3,4);
@@ -78,7 +78,7 @@ hI4 = plot(tsave(1:clockmax), Isave(1:clockmax, 3), 'r', 'LineWidth', 1.5);
 hR4 = plot(tsave(1:clockmax), Rsave(1:clockmax, 3), 'b', 'LineWidth', 1.5);
 hD4 = plot(tsave(1:clockmax), Dsave(1:clockmax, 3), 'k', 'LineWidth', 1.5);
 legend({'S','I','R', 'D'},'Location','northeast')
-axis([0, tmax, 0, 1.02])
+axis([0, tmax/day, 0, 1.02])
 title('Quarantined')
 
 subplot(2,3,5)
@@ -87,14 +87,14 @@ hU  = plot(tsave(1:clockmax), Usave(1:clockmax), 'g', 'LineWidth', 1.5);
 hV  = plot(tsave(1:clockmax), Vsave(1:clockmax), 'r', 'LineWidth', 1.5);
 hQ  = plot(tsave(1:clockmax), Qsave(1:clockmax), 'k', 'LineWidth', 1.5);
 legend({'U','V','Q'},'Location','northeast')
-axis([0, tmax, 0, 1.02])
+axis([0, tmax/day, 0, 1.02])
 title('States')
 
 subplot(2,3,6);
 hold on
 hN = plot(tsave(1:clockmax), sum(Nsave(1:clockmax)), 'k', 'LineWidth', 1.5);
 expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
-axis([0, tmax, 0, expectedSize]);
+axis([0, tmax/day, 0, expectedSize]);
 title('Total Population')
 
 drawnow;
@@ -138,7 +138,7 @@ for clock = 1:clockmax
     N = S + R + I;
     
     % Update tsave, Ssave, Isave, Rsave, Dsave
-    tsave(clock) = t; 
+    tsave(clock) = t / day; 
     Nsave(clock, :) = N;
     Ssave(clock, :) = S ./ N;
     Isave(clock, :) = I ./ N;
@@ -149,7 +149,7 @@ for clock = 1:clockmax
     Dsave(clock, :) = N(3) / sum(N);
     
     % Update the plots in the first subplot
-    subplot(2,3,1)
+    subplot(2,3,1);
     set(hS1, 'XData', tsave(1:clock), 'YData', sum(Ssave(1:clock, :), 2)/3);
     set(hI1, 'XData', tsave(1:clock), 'YData', sum(Isave(1:clock, :), 2)/3);
     set(hR1, 'XData', tsave(1:clock), 'YData', sum(Rsave(1:clock, :), 2)/3);
@@ -157,32 +157,32 @@ for clock = 1:clockmax
 
 
     % Update the plots in the second subplot
-    subplot(2,3,2)
+    subplot(2,3,2);
     set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 1));
     set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 1));
     set(hR2, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 1));
     set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1));
 
      % Update the plots in the first subplot
-    subplot(2,3,3)
+    subplot(2,3,3);
     set(hS3, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 2));
     set(hI3, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 2));
     set(hR3, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 2));
     set(hD3, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2));
 
     % Update the plots in the second subplot
-    subplot(2,3,4)
+    subplot(2,3,4);
     set(hS4, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 3));
     set(hI4, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 3));
     set(hR4, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 3));
     set(hD4, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3));
     
-    subplot(2,3,5)
+    subplot(2,3,5);
     set(hU, 'XData',  tsave(1:clock), 'YData', Usave(1:clock));
     set(hV, 'XData',  tsave(1:clock), 'YData', Vsave(1:clock));
     set(hQ, 'XData',  tsave(1:clock), 'YData', Qsave(1:clock));
 
-    subplot(2,3,6)
+    subplot(2,3,6);
     set(hN, 'XData',  tsave(1:clock), 'YData', sum(Nsave(1:clock, :), 2));
 
     drawnow;
