@@ -1,9 +1,9 @@
+%% Model Parameters
 day      = 60*60*24; % Day length (s).
 tmax     = day * 100; % Duration of the simulation (s).
 clockmax = 100 ;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
-%% Model Parameters
 A           = 1/day;  % infectivity 
 B           = 0.5/day;  % recovery rate 
 
@@ -21,7 +21,7 @@ vr          = 0.0005/day;       % Vaccination rate
 qr          = 0.1/day;       % Quarantine rate
 
 %% Initial Conditions
-N =     [100000,        0,     0] ; % Total population
+N =     [100000,      0,    0] ; % Total population
 I =     [100,         0,     0] ; % Infected
 S =     [N(1)-I(1),   0,     0] ; % Susceptible 
 R =     [0,           0,     0] ; % Recovered
@@ -93,7 +93,7 @@ title('States')
 subplot(2,3,6);
 hold on
 hN = plot(tsave(1:clockmax), sum(Nsave(1:clockmax)), 'k', 'LineWidth', 1.5);
-expectedSize = sum(N) * (1 + betaH - deltaH)^tmax
+expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
 axis([0, tmax, 0, expectedSize]);
 title('Total Population')
 
@@ -144,7 +144,6 @@ for clock = 1:clockmax
     Isave(clock, :) = I ./ N;
     Rsave(clock, :) = R ./ N;
     Dsave(clock, :) = D ./ N;
-    
     Usave(clock, :) = N(1) / sum(N);
     Vsave(clock, :) = N(2) / sum(N);
     Dsave(clock, :) = N(3) / sum(N);
@@ -183,7 +182,7 @@ for clock = 1:clockmax
     set(hV, 'XData',  tsave(1:clock), 'YData', Vsave(1:clock));
     set(hQ, 'XData',  tsave(1:clock), 'YData', Qsave(1:clock));
 
-    subplot(2,3,5)
+    subplot(2,3,6)
     set(hN, 'XData',  tsave(1:clock), 'YData', sum(Nsave(1:clock, :), 2));
 
     drawnow;
