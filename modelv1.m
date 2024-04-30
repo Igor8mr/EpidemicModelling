@@ -11,10 +11,10 @@ a           = [A, A/2, 0];
 b           = [B, B/2, B];
 ra          = 0.5;         % reinfection multiplier
 
-betaH       = 0*0.001/day;   % birthrate for healthy
+betaH       = 0.01/day;   % birthrate for healthy
 betaI       = betaH * (1/4); % birthrate for ill 
 
-deltaH      = betaH;       % Death rate for healthy individuals
+deltaH      = betaH*0.05;       % Death rate for healthy individuals
 deltaI      = [deltaH * 5, deltaH * 5 /2,  deltaH * 5]; % Death rate for infected individuals
 
 vr          = 0.0005/day;       % Vaccination rate
@@ -83,12 +83,19 @@ title('Quarantined')
 
 subplot(2,3,5)
 hold on
-hU  = plot(tsave(1:clockmax), Usave(1:clockmax), 'g', 'LineWidth', 2);
-hV  = plot(tsave(1:clockmax), Vsave(1:clockmax), 'r', 'LineWidth', 2);
-hQ  = plot(tsave(1:clockmax), Qsave(1:clockmax), 'k', 'LineWidth', 2);
+hU  = plot(tsave(1:clockmax), Usave(1:clockmax), 'g', 'LineWidth', 1.5);
+hV  = plot(tsave(1:clockmax), Vsave(1:clockmax), 'r', 'LineWidth', 1.5);
+hQ  = plot(tsave(1:clockmax), Qsave(1:clockmax), 'k', 'LineWidth', 1.5);
 legend({'U','V','Q'},'Location','northeast')
 axis([0, tmax, 0, 1.02])
 title('States')
+
+subplot(2,3,6);
+hold on
+hN = plot(tsave(1:clockmax), sum(Nsave(1:clockmax)), 'k', 'LineWidth', 1.5);
+expectedSize = sum(N) * (1 + betaH - deltaH)^tmax
+axis([0, tmax, 0, expectedSize]);
+title('Total Population')
 
 drawnow;
 
@@ -132,6 +139,7 @@ for clock = 1:clockmax
     
     % Update tsave, Ssave, Isave, Rsave, Dsave
     tsave(clock) = t; 
+    Nsave(clock, :) = N;
     Ssave(clock, :) = S ./ N;
     Isave(clock, :) = I ./ N;
     Rsave(clock, :) = R ./ N;
@@ -174,6 +182,9 @@ for clock = 1:clockmax
     set(hU, 'XData',  tsave(1:clock), 'YData', Usave(1:clock));
     set(hV, 'XData',  tsave(1:clock), 'YData', Vsave(1:clock));
     set(hQ, 'XData',  tsave(1:clock), 'YData', Qsave(1:clock));
+
+    subplot(2,3,5)
+    set(hN, 'XData',  tsave(1:clock), 'YData', sum(Nsave(1:clock, :), 2));
 
     drawnow;
     
