@@ -1,11 +1,17 @@
 %% Model Parameters
+
+%% TODO 
+%%%% make function 
+%%%% realistic parameters deathrate, reinfection, etc
+%%%% implement cost (find stats) 
+
 day      = 60*60*24; % Day length (s).
 tmax     = day * 50; % Duration of the simulation (s).
 clockmax = 100;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
-A           = 1/day;  % infectivity 
-B           = 0.5/day;  % recovery rate 
+B           = 0.3/day;  % recovery rate 
+A           = 0.85/day;  % infectivity 
 
 a           = [A, A/2, 0];
 b           = [B, B/2, B];
@@ -42,7 +48,6 @@ NBsave = zeros(clockmax, 1);
 
 %% Create the figure and subplots
 figure;
-
 subplot(2,3,1);
 hold on
 hS1 = plot(tsave(1:clockmax), sum(Ssave(1:clockmax)), 'g', 'LineWidth', 1.5);
@@ -94,8 +99,8 @@ title('States')
 
 subplot(2,3,6);
 hold on
-hN = plot(tsave(1:clockmax), sum(Nsave(1:clockmax), 2), 'k', 'LineWidth', 1.5);
-hND = plot(tsave(1:clockmax), NDsave(1:clockmax), 'r', 'LineWidth', 1.5);
+hN  = plot(tsave(1:clockmax), sum(Nsave(1:clockmax), 2), 'c', 'LineWidth', 1.5);
+hND = plot(tsave(1:clockmax), NDsave(1:clockmax), 'k', 'LineWidth', 1.5);
 hNB = plot(tsave(1:clockmax), NBsave(1:clockmax), 'g', 'LineWidth', 1.5);
 expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
 legend({'N','D','B'},'Location','northeast')
