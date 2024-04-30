@@ -1,7 +1,7 @@
 %% Model Parameters
 day      = 60*60*24; % Day length (s).
 tmax     = day * 50; % Duration of the simulation (s).
-clockmax = 100 ;% Number of time steps.
+clockmax = 50 ;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
 A           = 1/day;  % infectivity 
@@ -14,7 +14,7 @@ ra          = 0.5;         % reinfection multiplier
 betaH       = 0.01/day;   % birthrate for healthy
 betaI       = betaH * (1/4); % birthrate for ill 
 
-deltaH      = betaH*0.05;       % Death rate for healthy individuals
+deltaH      = betaH;       % Death rate for healthy individuals
 deltaI      = [deltaH * 5, deltaH * 5 /2,  deltaH * 5]; % Death rate for infected individuals
 
 vr          = 0.0005/day;       % Vaccination rate
@@ -92,7 +92,7 @@ title('States')
 
 subplot(2,3,6);
 hold on
-hN = plot(tsave(1:clockmax), sum(Nsave(1:clockmax)), 'k', 'LineWidth', 1.5);
+hN = plot(tsave(1:clockmax), sum(Nsave(1:clockmax), 2), 'k', 'LineWidth', 1.5);
 expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
 axis([0, tmax/day, 0, expectedSize]);
 title('Total Population')
@@ -146,7 +146,7 @@ for clock = 1:clockmax
     Dsave(clock, :) = D ./ N;
     Usave(clock, :) = N(1) / sum(N);
     Vsave(clock, :) = N(2) / sum(N);
-    Dsave(clock, :) = N(3) / sum(N);
+    Qsave(clock, :) = N(3) / sum(N);
     
     % Update the plots in the first subplot
     subplot(2,3,1);
