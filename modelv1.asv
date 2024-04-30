@@ -1,7 +1,7 @@
 %% Model Parameters
 day      = 60*60*24; % Day length (s).
 tmax     = day * 50; % Duration of the simulation (s).
-clockmax = 100;% Number of time steps.
+clockmax = 50 ;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
 A           = 1/day;  % infectivity 
@@ -94,17 +94,15 @@ title('States')
 
 subplot(2,3,6);
 hold on
-hN = plot(tsave(1:clockmax), sum(Nsave(1:clockmax), 2), 'k', 'LineWidth', 1.5);
-hND = plot(tsave(1:clockmax), NDsave(1:clockmax), 'r', 'LineWidth', 1.5);
-hNB = plot(tsave(1:clockmax), NBsave(1:clockmax), 'g', 'LineWidth', 1.5);
+hN = plot(tsave(1:clockmax), sum(Nsave(1:clockmax), 2), 'b', 'LineWidth', 1.5);
+hND = plot(tsave(1:clockmax), NBsave(1:clockmax), 'r', 'LineWidth', 1.5);
+hNB = plot(tsave(1:clockmax), NQsave(1:clockmax), 'g', 'LineWidth', 1.5);
 expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
 legend({'N','D','B'},'Location','northeast')
 axis([0, tmax/day, 0, expectedSize]);
 title('Total Population')
 
 drawnow;
-
-births = 0;
 
 %% Main Simulation Loop
 for clock = 1:clockmax
@@ -143,8 +141,6 @@ for clock = 1:clockmax
 
 
     N = S + R + I;
-
-    births = births + Sbirths;
     
     % Update tsave, Ssave, Isave, Rsave, Dsave
     tsave(clock) = t / day; 
@@ -156,8 +152,6 @@ for clock = 1:clockmax
     Usave(clock, :) = N(1) / sum(N);
     Vsave(clock, :) = N(2) / sum(N);
     Qsave(clock, :) = N(3) / sum(N);
-    NDsave(clock) = sum(D);
-    NBsave(clock) = births;
     
     % Update the plots in the first subplot
     subplot(2,3,1);
@@ -195,9 +189,7 @@ for clock = 1:clockmax
 
     subplot(2,3,6);
     set(hN, 'XData',  tsave(1:clock), 'YData', sum(Nsave(1:clock, :), 2));
-    set(hND, 'XData',  tsave(1:clock), 'YData', NDsave(1:clock));
-    set(hNB, 'XData',  tsave(1:clock), 'YData', NBsave(1:clock));
-
+    set(hND, 'XData',  tsave(1:clock), 'YData', sum(Nsave(1:clock, :), 2));
 
     drawnow;
     
