@@ -13,7 +13,8 @@ dt = tmax/clockmax ;% Calculates the duration of each time step.
 vDevelopTime = 10 * month;
 vDevelopCost = 31 * (10 ^ 9) / vDevelopTime;
 vCostPerDose = 20;
-qDailyCost = 400;
+qDailyCostI = 400;
+qDailyCostH = 75;
 
 A           = 0.85/month; 
 reprNumb    = 4.3; % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7359536/
@@ -33,7 +34,7 @@ deltaVI     = 0.051 / month;         % https://www.ncbi.nlm.nih.gov/pmc/articles
 deltaI      = [deltaUI, deltaVI, deltaUI]; % Death rate for infected individuals
 
 vr          = 0.1/month;       % Vaccination rate % https://usafacts.org/visualizations/covid-vaccine-tracker-states/
-qr          = 0.2/month;       % Quarantine rate
+qr          = 0.03/month;       % Quarantine rate
 
 initialN = 335 * (10^6); % https://census.gov/quickfacts/fact/table/US/PST045221
 intialI = 0.5 * (10^6);
@@ -132,7 +133,7 @@ hVC = plot(tsave(1:clockmax), VCsave(1:clockmax), 'r', 'LineWidth', 1.5);
 hQC = plot(tsave(1:clockmax), QCsave(1:clockmax), 'b', 'LineWidth', 1.5);
 expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
 legend({'TC','VC','QC'},'Location','northeast')
-axis([0, tmax/month, 0, 2.5*10^11]);
+axis([0, tmax/month, 0, 2*10^12]);
 title('Costs')
 
 subplot(2,4,8);
@@ -188,8 +189,6 @@ for clock = 1:clockmax
     R(1) = R(1) - R1toR3;
     R(3) = R(3) + R1toR3;
 
-    QC = QC + qDailyCost * (S1toS3 + R1toR3 + I1toI3);
-
     %% Vaccinations
     if t > vDevelopTime
         R1toR2 = R(1) * vr * dt;
@@ -217,6 +216,8 @@ for clock = 1:clockmax
     %% Results
     N = S + R + I;
     births = births + Sbirths;
+
+    QC = QC + I(3) * qDailyCostI + (S(3) + R(3)) * qDailyCostI;
 
     if t < vDevelopTime
         N(2) = 1;
