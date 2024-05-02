@@ -225,6 +225,14 @@ for clock = 1:clockmax
         R(2) = 0;
         D(2) = 0;
     end
+
+    if qr == 0
+        N(3) = 1;
+        S(3) = 0;
+        I(3) = 0;
+        R(3) = 0;
+        D(3) = 0;
+    end
         
 
     % Update tsave, Ssave, Isave, Rsave, Dsave
