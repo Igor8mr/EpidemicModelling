@@ -143,7 +143,7 @@ hDV = plot(tsave(1:clockmax), Dsave(1:clockmax, 2), 'g', 'LineWidth', 1.5);
 hDQ = plot(tsave(1:clockmax), Dsave(1:clockmax, 3), 'b', 'LineWidth', 1.5);
 legend({'TD', 'UD','VD','QD'},'Location','northeast')
 axis([0, tmax/month, 0, sum(D)]);
-title('Death Ratios')
+title('Deaths')
 
 
 drawnow;
@@ -266,7 +266,7 @@ for clock = 1:clockmax
     set(hS3, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 2) ./ scale);
     set(hI3, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 2) ./ scale);
     set(hR3, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 2) ./ scale);
-    set(hD3, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2) ./ scale);
+    %set(hD3, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2) ./ scale);
     
     % Update the plots in the second subplot
     subplot(2,4,4);
@@ -293,7 +293,7 @@ for clock = 1:clockmax
 
     subplot(2,4,8);
     axis([0, tmax/month, 0, sum(D)*1.05]);
-    set(hND, 'XData',  tsave(1:clock), 'YData', NDsave(1:clock));
+    set(hDT, 'XData',  tsave(1:clock), 'YData', NDsave(1:clock));
     set(hDU, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1));
     set(hDV, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3));
     set(hDQ, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2));
