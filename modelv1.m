@@ -16,8 +16,8 @@ vCostPerDose = 20;
 qDailyCost = 400;
 
 A           = 0.85/month; 
-AoverB      = 4.3; % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7359536/
-UB          = A/AoverB; % https://www.medicalnewstoday.com/articles/how-long-is-a-person-contagious-with-coronavirus
+reprNumb    = 4.3; % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7359536/
+UB          = A/reprNumb; % https://www.medicalnewstoday.com/articles/how-long-is-a-person-contagious-with-coronavirus
 VB          = 1.5*UB;  % https://www.health.com/condition/infectious-diseases/coronavirus/spread-covid-after-vaccine#citation-8:~:text=Some%20research%20has,8
 
 a           = [A, A/2, 0];
@@ -28,22 +28,23 @@ betaH       = (11/1000)/(month * 12);   % birthrate for healthy https://www.cdc.
 betaI       = betaH * (1/4); % birthrate for ill 
 
 deltaH      = (798/100000)/(month*12);       % Death rate for healthy individuals https://www.cdc.gov/nchs/products/databriefs/db492.htm#:~:text=Data%20from%20the%20National%20Vital,2021%20to%20798.8%20in%202022.
-deltaUI     = 0.083 * B;         % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9848037/#:~:text=The%20covariate%2Dadjusted%20mortality%20rates%20were%205.1%25%20and%208.3%25%20for%20vaccinated%20and%20unvaccinated%20patients%20hospitalized%20with%20COVID%2D19%2C%20respectively%2C%20in%20the%20whole%20analysis%20sample
-deltaVI     = 0.051 * B;         % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9848037/#:~:text=The%20covariate%2Dadjusted%20mortality%20rates%20were%205.1%25%20and%208.3%25%20for%20vaccinated%20and%20unvaccinated%20patients%20hospitalized%20with%20COVID%2D19%2C%20respectively%2C%20in%20the%20whole%20analysis%20sample
+deltaUI     = 0.083 * UB;       % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9848037/#:~:text=The%20covariate%2Dadjusted%20mortality%20rates%20were%205.1%25%20and%208.3%25%20for%20vaccinated%20and%20unvaccinated%20patients%20hospitalized%20with%20COVID%2D19%2C%20respectively%2C%20in%20the%20whole%20analysis%20sample
+deltaVI     = 0.051 * UB;         % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9848037/#:~:text=The%20covariate%2Dadjusted%20mortality%20rates%20were%205.1%25%20and%208.3%25%20for%20vaccinated%20and%20unvaccinated%20patients%20hospitalized%20with%20COVID%2D19%2C%20respectively%2C%20in%20the%20whole%20analysis%20sample
 deltaI      = [deltaUI, deltaVI,  deltaUI]; % Death rate for infected individuals
 
-vr          = (0.60-0.19)/(8 * month);       % Vaccination rate % https://usafacts.org/visualizations/covid-vaccine-tracker-states/
+vr          = 0.5/month;       % Vaccination rate % https://usafacts.org/visualizations/covid-vaccine-tracker-states/
 qr          = 0.3/month;       % Quarantine rate
 
-initialN = 300 * (10^6);
-intialI = 1 * (10^6);
+initialN = 335 * (10^6); % https://census.gov/quickfacts/fact/table/US/PST045221
+intialI = 0.5 * (10^6);
 
-%% Initial Conditions
-N =     [initialN,      0,    0] ; % Total population
-I =     [intialI,         0,     0] ; % Infected
-S =     [N(1)-I(1),   0,     0] ; % Susceptible 
-R =     [0,           0,     0] ; % Recovered
-D =     [0,           0,     0] ; % Total Deceased
+%% Initial Conditions 
+% All start with at least one to avoid division by 0 when scaling. 
+N =     [initialN,    1,     1] ; % Total population
+I =     [intialI,     1,     1] ; % Infected
+S =     [N(1)-I(1),   1,     1] ; % Susceptible 
+R =     [0,           1,     1] ; % Recovered
+D =     [0,           1,     1] ; % Total Deceased
 
 VC = 0;
 QC = 0;
@@ -162,43 +163,66 @@ for clock = 1:clockmax
     R = R + Rnew - Rinf - Rdie;
     D = D + Sdie + Idie + Rdie;
 
+    %% Quarantines
+    S1toS3 = S(1) * qr * dt;
+    R1toR3 = R(1) * qr * dt;
+    I1toI3 = I(1) * qr*2 * dt;
+    
+    S(1) = S(1) - S1toS3;
+    S(3) = S(3) + S1toS3;
+    
+    I(1) = I(1) - I1toI3;
+    I(3) = I(3) + I1toI3;
+    
+    R(1) = R(1) - R1toR3;
+    R(3) = R(3) + R1toR3;
+
+    QC = QC + qDailyCost * (newS3 + newI3 + newR3);
+
+    %% Vaccinations
     if t > vDevelopTime
-        newR2 = R(1) * vr * dt + R(3) * vr * dt;
-        newS2 = S(1) * vr * dt + S(3) * vr * dt;
-        R(2) = R(2) + newR2;
-        S(2) = S(2) + newS2;
+        R1toR2 = R(1) * vr * dt;
+        R3toR2 = R(3) * vr * dt;
+        S1toS2 = S(1) * vr * dt;
+        S3toS2 = S(3) * vr * dt;
         VC = VC + vCostPerDose * (newR2 + newS2);
     else
-        newR2 = 0;
-        newS2 = 0;
+        R1toR2 = 0;
+        R3toR2 = 0;
+        S1toS2 = 0;
+        S3toS2 = 0;
+        
         VC = t * vDevelopCost;
     end
 
-    S(1) = S(1) - S(1) * qr * dt - newS2;
-    newS3 = S(1) * qr * dt - S(3) * vr * dt;
-    S(3) = S(3) + newS3;
+    S(1) = S(1) - R1toR2;
+    S(2) = S(2) + R1toR2 + R3toR2;
+    S(3) = S(3) - R3toR2;
     
-    I(1) = I(1) - I(1) * qr * 2 * dt;
-    newI3 = I(1) * qr * 2 * dt;
-    I(3) = I(3) + newI3;
+    R(1) = R(1) - R1toR2;
+    R(2) = R(2) + R1toR2 + R3toR2;
+    R(3) = R(3) - R3toR2;
     
-    R(1) = R(1) - R(1) * (qr) * dt- newR2;
-    newR3 = R(1) * qr * dt - R(3) * vr * dt;
-    R(3) = R(3) + newR3;
-    QC = QC + qDailyCost * (newS3 + newI3 + newR3);
-
-
+    %% Results
     N = S + R + I;
-
     births = births + Sbirths;
-    
+
+    if t < vDevelopTime
+        N(2) = 1;
+        S(2) = 0;
+        I(2) = 0;
+        R(2) = 0;
+        D(2) = 0;
+    end
+        
+
     % Update tsave, Ssave, Isave, Rsave, Dsave
     tsave(clock) = t / month; 
     Nsave(clock, :) = N;
-    Ssave(clock, :) = S ./ N;
-    Isave(clock, :) = I ./ N;
-    Rsave(clock, :) = R ./ N;
-    Dsave(clock, :) = D ./ N;
+    Ssave(clock, :) = S;
+    Isave(clock, :) = I;
+    Rsave(clock, :) = R;
+    Dsave(clock, :) = D;
     Usave(clock, :) = N(1) / sum(N);
     Vsave(clock, :) = N(2) / sum(N);
     Qsave(clock, :) = N(3) / sum(N);
@@ -210,32 +234,36 @@ for clock = 1:clockmax
     
     % Update the plots in the first subplot
     subplot(2,4,1);
-    set(hS1, 'XData', tsave(1:clock), 'YData', sum(Ssave(1:clock, :), 2)/3);
-    set(hI1, 'XData', tsave(1:clock), 'YData', sum(Isave(1:clock, :), 2)/3);
-    set(hR1, 'XData', tsave(1:clock), 'YData', sum(Rsave(1:clock, :), 2)/3);
-    set(hD1, 'XData', tsave(1:clock), 'YData', sum(Dsave(1:clock, :), 2)/3);
+    scale = sum(Nsave(1:clock, :), 2);
+    set(hS1, 'XData', tsave(1:clock), 'YData', sum(Ssave(1:clock, :) ./ scale, 2));
+    set(hI1, 'XData', tsave(1:clock), 'YData', sum(Isave(1:clock, :) ./ scale, 2));
+    set(hR1, 'XData', tsave(1:clock), 'YData', sum(Rsave(1:clock, :) ./ scale, 2));
+    set(hD1, 'XData', tsave(1:clock), 'YData', sum(Dsave(1:clock, :) ./ scale, 2));
 
 
     % Update the plots in the second subplot
     subplot(2,4,2);
-    set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 1));
-    set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 1));
-    set(hR2, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 1));
-    set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1));
+    scale = Nsave(1:clock, 1);
+    set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 1) ./ scale);
+    set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 1) ./ scale);
+    set(hR2, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 1) ./ scale);
+    set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1) ./ scale);
 
      % Update the plots in the first subplot
     subplot(2,4,3);
-    set(hS3, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 2));
-    set(hI3, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 2));
-    set(hR3, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 2));
-    set(hD3, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2));
-
+    scale = Nsave(1:clock, 2);
+    set(hS3, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 2) ./ scale);
+    set(hI3, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 2) ./ scale);
+    set(hR3, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 2) ./ scale);
+    set(hD3, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2) ./ scale);
+    
     % Update the plots in the second subplot
     subplot(2,4,4);
-    set(hS4, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 3));
-    set(hI4, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 3));
-    set(hR4, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 3));
-    set(hD4, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3));
+    scale = Nsave(1:clock, 3);
+    set(hS4, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 3) ./ scale);
+    set(hI4, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 3) ./ scale);
+    set(hR4, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 3) ./ scale);
+    set(hD4, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3) ./ scale);
     
     subplot(2,4,5);
     set(hU, 'XData',  tsave(1:clock), 'YData', Usave(1:clock));
