@@ -28,12 +28,12 @@ betaH       = (11/1000)/(month * 12);   % birthrate for healthy https://www.cdc.
 betaI       = betaH * (1/4); % birthrate for ill 
 
 deltaH      = (798/100000)/(month*12);       % Death rate for healthy individuals https://www.cdc.gov/nchs/products/databriefs/db492.htm#:~:text=Data%20from%20the%20National%20Vital,2021%20to%20798.8%20in%202022.
-deltaUI     = 0.083 * UB;       % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9848037/#:~:text=The%20covariate%2Dadjusted%20mortality%20rates%20were%205.1%25%20and%208.3%25%20for%20vaccinated%20and%20unvaccinated%20patients%20hospitalized%20with%20COVID%2D19%2C%20respectively%2C%20in%20the%20whole%20analysis%20sample
-deltaVI     = 0.051 * UB;         % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9848037/#:~:text=The%20covariate%2Dadjusted%20mortality%20rates%20were%205.1%25%20and%208.3%25%20for%20vaccinated%20and%20unvaccinated%20patients%20hospitalized%20with%20COVID%2D19%2C%20respectively%2C%20in%20the%20whole%20analysis%20sample
-deltaI      = [deltaUI, deltaVI,  deltaUI]; % Death rate for infected individuals
+deltaUI     = 0.083 / month;       % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9848037/#:~:text=The%20covariate%2Dadjusted%20mortality%20rates%20were%205.1%25%20and%208.3%25%20for%20vaccinated%20and%20unvaccinated%20patients%20hospitalized%20with%20COVID%2D19%2C%20respectively%2C%20in%20the%20whole%20analysis%20sample
+deltaVI     = 0.051 / month;         % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9848037/#:~:text=The%20covariate%2Dadjusted%20mortality%20rates%20were%205.1%25%20and%208.3%25%20for%20vaccinated%20and%20unvaccinated%20patients%20hospitalized%20with%20COVID%2D19%2C%20respectively%2C%20in%20the%20whole%20analysis%20sample
+deltaI      = [deltaUI, deltaVI, deltaUI]; % Death rate for infected individuals
 
-vr          = 0.5/month;       % Vaccination rate % https://usafacts.org/visualizations/covid-vaccine-tracker-states/
-qr          = 0.3/month;       % Quarantine rate
+vr          = 0.1/month;       % Vaccination rate % https://usafacts.org/visualizations/covid-vaccine-tracker-states/
+qr          = 0.2/month;       % Quarantine rate
 
 initialN = 335 * (10^6); % https://census.gov/quickfacts/fact/table/US/PST045221
 intialI = 0.5 * (10^6);
@@ -81,8 +81,8 @@ hold on
 hS2 = plot(tsave(1:clockmax), Ssave(1:clockmax, 1), 'g', 'LineWidth', 1.5);
 hI2 = plot(tsave(1:clockmax), Isave(1:clockmax, 1), 'r', 'LineWidth', 1.5);
 hR2 = plot(tsave(1:clockmax), Rsave(1:clockmax, 1), 'b', 'LineWidth', 1.5);
-hD2 = plot(tsave(1:clockmax), Dsave(1:clockmax, 1), 'k', 'LineWidth', 1.5);
-legend({'S','I','R', 'D'},'Location','northeast')
+%hD2 = plot(tsave(1:clockmax), Dsave(1:clockmax, 1), 'k', 'LineWidth', 1.5);
+legend({'S','I','R'},'Location','northeast')
 axis([0, tmax/month, 0, 1.02])
 title('Not vaccinated')
 
@@ -91,8 +91,8 @@ hold on
 hS3 = plot(tsave(1:clockmax), Ssave(1:clockmax, 2), 'g', 'LineWidth', 1.5);
 hI3 = plot(tsave(1:clockmax), Isave(1:clockmax, 2), 'r', 'LineWidth', 1.5);
 hR3 = plot(tsave(1:clockmax), Rsave(1:clockmax, 2), 'b', 'LineWidth', 1.5);
-hD3 = plot(tsave(1:clockmax), Dsave(1:clockmax, 2), 'k', 'LineWidth', 1.5);
-legend({'S','I','R', 'D'},'Location','northeast')
+%hD3 = plot(tsave(1:clockmax), Dsave(1:clockmax, 2), 'k', 'LineWidth', 1.5);
+legend({'S','I','R'},'Location','northeast')
 axis([0, tmax/month, 0, 1.02])
 title('Vaccinated')
 
@@ -101,8 +101,8 @@ hold on
 hS4 = plot(tsave(1:clockmax), Ssave(1:clockmax, 3), 'g', 'LineWidth', 1.5);
 hI4 = plot(tsave(1:clockmax), Isave(1:clockmax, 3), 'r', 'LineWidth', 1.5);
 hR4 = plot(tsave(1:clockmax), Rsave(1:clockmax, 3), 'b', 'LineWidth', 1.5);
-hD4 = plot(tsave(1:clockmax), Dsave(1:clockmax, 3), 'k', 'LineWidth', 1.5);
-legend({'S','I','R', 'D'},'Location','northeast')
+%hD4 = plot(tsave(1:clockmax), Dsave(1:clockmax, 3), 'k', 'LineWidth', 1.5);
+legend({'S','I','R'},'Location','northeast')
 axis([0, tmax/month, 0, 1.02])
 title('Quarantined')
 
@@ -134,6 +134,17 @@ expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
 legend({'TC','VC','QC'},'Location','northeast')
 axis([0, tmax/month, 0, 2.5*10^11]);
 title('Costs')
+
+subplot(2,4,8);
+hold on
+hDT = plot(tsave(1:clockmax), sum(Dsave(1:clockmax), 2), 'k', 'LineWidth', 1.5);
+hDU = plot(tsave(1:clockmax), Dsave(1:clockmax, 1), 'r', 'LineWidth', 1.5);
+hDV = plot(tsave(1:clockmax), Dsave(1:clockmax, 2), 'g', 'LineWidth', 1.5);
+hDQ = plot(tsave(1:clockmax), Dsave(1:clockmax, 3), 'b', 'LineWidth', 1.5);
+legend({'TD', 'UD','VD','QD'},'Location','northeast')
+axis([0, tmax/month, 0, sum(D)]);
+title('Death Ratios')
+
 
 drawnow;
 
@@ -177,7 +188,7 @@ for clock = 1:clockmax
     R(1) = R(1) - R1toR3;
     R(3) = R(3) + R1toR3;
 
-    QC = QC + qDailyCost * (newS3 + newI3 + newR3);
+    QC = QC + qDailyCost * (S1toS3 + R1toR3 + I1toI3);
 
     %% Vaccinations
     if t > vDevelopTime
@@ -185,7 +196,7 @@ for clock = 1:clockmax
         R3toR2 = R(3) * vr * dt;
         S1toS2 = S(1) * vr * dt;
         S3toS2 = S(3) * vr * dt;
-        VC = VC + vCostPerDose * (newR2 + newS2);
+        VC = VC + vCostPerDose * (R1toR2 + R3toR2 + S1toS2 + S3toS2);
     else
         R1toR2 = 0;
         R3toR2 = 0;
@@ -195,9 +206,9 @@ for clock = 1:clockmax
         VC = t * vDevelopCost;
     end
 
-    S(1) = S(1) - R1toR2;
-    S(2) = S(2) + R1toR2 + R3toR2;
-    S(3) = S(3) - R3toR2;
+    S(1) = S(1) - S1toS2;
+    S(2) = S(2) + S1toS2 + S3toS2;
+    S(3) = S(3) - S3toS2;
     
     R(1) = R(1) - R1toR2;
     R(2) = R(2) + R1toR2 + R3toR2;
@@ -247,7 +258,7 @@ for clock = 1:clockmax
     set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 1) ./ scale);
     set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 1) ./ scale);
     set(hR2, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 1) ./ scale);
-    set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1) ./ scale);
+    %set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1) ./ scale);
 
      % Update the plots in the first subplot
     subplot(2,4,3);
@@ -263,7 +274,7 @@ for clock = 1:clockmax
     set(hS4, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 3) ./ scale);
     set(hI4, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 3) ./ scale);
     set(hR4, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 3) ./ scale);
-    set(hD4, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3) ./ scale);
+    %set(hD4, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3) ./ scale);
     
     subplot(2,4,5);
     set(hU, 'XData',  tsave(1:clock), 'YData', Usave(1:clock));
@@ -279,6 +290,13 @@ for clock = 1:clockmax
     set(hTC, 'XData',  tsave(1:clock), 'YData', QCsave(1:clock) + VCsave(1:clock));
     set(hQC, 'XData',  tsave(1:clock), 'YData', QCsave(1:clock));
     set(hVC, 'XData',  tsave(1:clock), 'YData', VCsave(1:clock));
+
+    subplot(2,4,8);
+    axis([0, tmax/month, 0, sum(D)*1.05]);
+    set(hND, 'XData',  tsave(1:clock), 'YData', NDsave(1:clock));
+    set(hDU, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1));
+    set(hDV, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3));
+    set(hDQ, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2));
 
     drawnow;
     
