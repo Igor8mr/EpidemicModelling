@@ -5,16 +5,17 @@
 %%%% realistic parameters deathrate, reinfection, etc
 %%%% implement cost (find stats) 
 
-month      = 60*60*24; % Day length (s).
-tmax     = month * 40; % Duration of the simulation (s).
+day         = 24; % Month length (h).
+month      = day*30; % Month length (h).
+tmax     = month * 40; % Duration of the simulation (h).
 clockmax = 100;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
 vDevelopTime = 10 * month;
 vDevelopCost = 31 * (10 ^ 9) / vDevelopTime;
 vCostPerDose = 20;
-qDailyCostI = 400;
-qDailyCostH = 75;
+qDailyCostI = 400/day;
+qDailyCostH = 50/day;
 
 A           = 0.85/month; 
 reprNumb    = 4.3; % https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7359536/
@@ -34,18 +35,18 @@ deltaVI     = 0.051 / month;         % https://www.ncbi.nlm.nih.gov/pmc/articles
 deltaI      = [deltaUI, deltaVI, deltaUI]; % Death rate for infected individuals
 
 vr          = 0.1/month;       % Vaccination rate % https://usafacts.org/visualizations/covid-vaccine-tracker-states/
-qr          = 0.03/month;       % Quarantine rate
+qr          = 0.01/month;       % Quarantine rate
 
-initialN = 335 * (10^6); % https://census.gov/quickfacts/fact/table/US/PST045221
 intialI = 0.5 * (10^6);
+initialN = 335 * (10^6) + intialI; % https://census.gov/quickfacts/fact/table/US/PST045221
 
 %% Initial Conditions 
 % All start with at least one to avoid division by 0 when scaling. 
 N =     [initialN,    1,     1] ; % Total population
 I =     [intialI,     1,     1] ; % Infected
 S =     [N(1)-I(1),   1,     1] ; % Susceptible 
-R =     [0,           1,     1] ; % Recovered
-D =     [0,           1,     1] ; % Total Deceased
+R =     [1,           1,     1] ; % Recovered
+D =     [1,           1,     1] ; % Total Deceased
 
 VC = 0;
 QC = 0;
@@ -67,6 +68,7 @@ QCsave = zeros(clockmax, 1);
 
 %% Create the figure and subplots
 figure;
+
 subplot(2,4,1);
 hold on
 hS1 = plot(tsave(1:clockmax), sum(Ssave(1:clockmax)), 'g', 'LineWidth', 1.5);
@@ -217,7 +219,7 @@ for clock = 1:clockmax
     N = S + R + I;
     births = births + Sbirths;
 
-    QC = QC + I(3) * qDailyCostI + (S(3) + R(3)) * qDailyCostI;
+    QC = QC + I(3) * qDailyCostI * dt + (S(3) + R(3)) * qDailyCostH *dt;
 
     if t < vDevelopTime
         N(2) = 1;
