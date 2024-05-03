@@ -5,12 +5,9 @@
 %%%% realistic parameters deathrate, reinfection, etc
 %%%% implement cost (find stats) 
 
-imax = 0; 
-
-m = 5;
 day      = 24; % day length (h).
 month    = day*30; % Month length (h).
-tmax     = month * 40; % Duration of the simulation (h).
+tmax     = month * 50; % Duration of the simulation (h).
 clockmax = 100;% Number of time steps.
 dt = tmax/clockmax ;% Calculates the duration of each time step.
 
@@ -38,7 +35,7 @@ deltaVI     = 0.051 / month;         % https://www.ncbi.nlm.nih.gov/pmc/articles
 deltaI      = [deltaUI, deltaVI, deltaUI]; % Death rate for infected individuals
 
 vr          = 0.1 /month;       % Vaccination rate % https://usafacts.org/visualizations/covid-vaccine-tracker-states/
-qr          = 0.05/month;        % Quarantine rate
+qr          = 0.01/month;        % Quarantine rate
 
 intialI = 0.5 * (10^6);
 initialN = 335 * (10^6) + intialI; % https://census.gov/quickfacts/fact/table/US/PST045221
@@ -79,7 +76,7 @@ CQCsave = zeros(clockmax, 1);
 %% Create the figure and subplots
 figure('NumberTitle','off', 'Name', [' vr ' num2str(vr*month) 'rq' num2str(vr*month)]);
 
-subplot(2,m,1);
+subplot(2,4,1);
 hold on
 hS1 = plot(tsave(1:clockmax), sum(Ssave(1:clockmax)), 'g', 'LineWidth', 1.5);
 hI1 = plot(tsave(1:clockmax), sum(Isave(1:clockmax)), 'r', 'LineWidth', 1.5);
@@ -87,9 +84,9 @@ hR1 = plot(tsave(1:clockmax), sum(Rsave(1:clockmax)), 'b', 'LineWidth', 1.5);
 hD1 = plot(tsave(1:clockmax), sum(Dsave(1:clockmax)), 'k', 'LineWidth', 1.5);
 legend({'S','I','R', 'D'},'Location','northeast')
 axis([0, tmax/month, 0, 1.02])
-title('Total Population SIRD')
+title('Total Population')
 
-subplot(2,m,2);
+subplot(2,4,2);
 hold on
 hS2 = plot(tsave(1:clockmax), Ssave(1:clockmax, 1), 'g', 'LineWidth', 1.5);
 hI2 = plot(tsave(1:clockmax), Isave(1:clockmax, 1), 'r', 'LineWidth', 1.5);
@@ -99,7 +96,7 @@ legend({'S','I','R'},'Location','northeast')
 axis([0, tmax/month, 0, 1.02])
 title('Not vaccinated')
 
-subplot(2,m,3);
+subplot(2,4,3);
 hold on
 hS3 = plot(tsave(1:clockmax), Ssave(1:clockmax, 2), 'g', 'LineWidth', 1.5);
 hI3 = plot(tsave(1:clockmax), Isave(1:clockmax, 2), 'r', 'LineWidth', 1.5);
@@ -109,7 +106,7 @@ legend({'S','I','R'},'Location','northeast')
 axis([0, tmax/month, 0, 1.02])
 title('Vaccinated')
 
-subplot(2,m,4);
+subplot(2,4,4);
 hold on
 hS4 = plot(tsave(1:clockmax), Ssave(1:clockmax, 3), 'g', 'LineWidth', 1.5);
 hI4 = plot(tsave(1:clockmax), Isave(1:clockmax, 3), 'r', 'LineWidth', 1.5);
@@ -119,7 +116,7 @@ legend({'S','I','R'},'Location','northeast')
 axis([0, tmax/month, 0, 1.02])
 title('Quarantined')
 
-subplot(2,m,5)
+subplot(2,4,5)
 hold on
 hU  = plot(tsave(1:clockmax), Usave(1:clockmax), 'g', 'LineWidth', 1.5);
 hV  = plot(tsave(1:clockmax), Vsave(1:clockmax), 'r', 'LineWidth', 1.5);
@@ -128,17 +125,17 @@ legend({'U','V','Q'},'Location','northeast')
 axis([0, tmax/month, 0, 1.02])
 title('States')
 
-subplot(2,m,6);
+subplot(2,4,6);
 hold on
 hN  = plot(tsave(1:clockmax), sum(Nsave(1:clockmax), 2), 'c', 'LineWidth', 1.5);
 hND = plot(tsave(1:clockmax), NDsave(1:clockmax), 'k', 'LineWidth', 1.5);
 hNB = plot(tsave(1:clockmax), NBsave(1:clockmax), 'g', 'LineWidth', 1.5);
 expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
-legend({'N','D','B'},'Location','northeast')
+legend({'N','UD','VD', 'QD','B'},'Location','northeast')
 axis([0, tmax/month, 0, expectedSize]);
-title('Total Population Size Change')
+title('Total Population')
 
-subplot(2,m,8);
+subplot(2,4,7);
 hold on
 hTC  = plot(tsave(1:clockmax), QCsave(1:clockmax), 'k', 'LineWidth', 1.5);
 hVC = plot(tsave(1:clockmax), VCsave(1:clockmax), 'r', 'LineWidth', 1.5);
@@ -146,9 +143,9 @@ hQC = plot(tsave(1:clockmax), QCsave(1:clockmax), 'b', 'LineWidth', 1.5);
 expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
 legend({'TC','VC','QC'},'Location','northeast')
 axis([0, tmax/month, 0, 5*10^10]);
-title('Cost at Time')
+title('Costs')
 
-subplot(2,m,7);
+subplot(2,4,8);
 hold on
 hDT = plot(tsave(1:clockmax), sum(Dsave(1:clockmax), 2), 'k', 'LineWidth', 1.5);
 hDU = plot(tsave(1:clockmax), Dsave(1:clockmax, 1), 'r', 'LineWidth', 1.5);
@@ -158,14 +155,15 @@ legend({'TD', 'UD','VD','QD'},'Location','northeast')
 axis([0, tmax/month, 0, sum(D)]);
 title('Deaths')
 
-subplot(2,m,9);
- hold on
- hCTC = plot(tsave(1:clockmax), CQCsave(1:clockmax), 'k', 'LineWidth', 1.5);
- hCVC = plot(tsave(1:clockmax), CVCsave(1:clockmax), 'r', 'LineWidth', 1.5);
- hCQC = plot(tsave(1:clockmax), CQCsave(1:clockmax), 'b', 'LineWidth', 1.5);
- legend({'CTC','CVC','CQC'},'Location','northeast')
- axis([0, tmax/month, 0, 9*10^11]);
- title('Cumulative Costs')
+subplot(2,4,9);
+hold on
+hCTC  = plot(tsave(1:clockmax), QCsave(1:clockmax), 'k', 'LineWidth', 1.5);
+hCVC = plot(tsave(1:clockmax), CVCsave(1:clockmax), 'r', 'LineWidth', 1.5);
+hCQC = plot(tsave(1:clockmax), CQCsave(1:clockmax), 'b', 'LineWidth', 1.5);
+expectedSize = sum(N) * (1 + betaH - deltaH)^tmax;
+legend({'CTC','CVC','CQC'},'Location','northeast')
+axis([0, tmax/month, 0, 9*10^11]);
+title('Cumulative Costs')
 
 
 
@@ -197,9 +195,7 @@ for clock = 1:clockmax
     I = I + Sinf + Rinf - Idie - Rnew;
     R = R + Rnew - Rinf - Rdie;
     D = D + Sdie + Idie + Rdie;
-    if (I>imax)
-        imax = I;
-    end
+
     infprop = sum(I)/sum(N);
     %% Quarantines
     S1toS3 = S(1) * qr * infprop * dt;
@@ -230,7 +226,7 @@ for clock = 1:clockmax
         S3toS2 = 0;
         
         VC = t * vDevelopCost;
-        CVC = VC;
+        CVC = VC + CVC;
         % totalDevCost = VC;
     end
 
@@ -277,13 +273,14 @@ for clock = 1:clockmax
     Qsave(clock, :) = N(3) / sum(N);
     NDsave(clock) = sum(D);
     NBsave(clock) = births;
+
     VCsave(clock) = VC;
     QCsave(clock) = QC;
-    CVCsave(clock) = CVC;
-    CQCsave(clock) = CQC;
+    CVCsave(clock) = VC;
+    CQCsave(clock) = QC;
     
     % Update the plots in the first subplot
-    subplot(2,m,1);
+    subplot(2,4,1);
     scale = sum(Nsave(1:clock, :), 2);
     set(hS1, 'XData', tsave(1:clock), 'YData', sum(Ssave(1:clock, :) ./ scale, 2));
     set(hI1, 'XData', tsave(1:clock), 'YData', sum(Isave(1:clock, :) ./ scale, 2));
@@ -292,7 +289,7 @@ for clock = 1:clockmax
 
 
     % Update the plots in the second subplot
-    subplot(2,m,2);
+    subplot(2,4,2);
     scale = Nsave(1:clock, 1);
     set(hS2, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 1) ./ scale);
     set(hI2, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 1) ./ scale);
@@ -300,7 +297,7 @@ for clock = 1:clockmax
     %set(hD2, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1) ./ scale);
 
      % Update the plots in the first subplot
-    subplot(2,m,3);
+    subplot(2,4,3);
     scale = Nsave(1:clock, 2);
     set(hS3, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 2) ./ scale);
     set(hI3, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 2) ./ scale);
@@ -308,36 +305,36 @@ for clock = 1:clockmax
     %set(hD3, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2) ./ scale);
     
     % Update the plots in the second subplot
-    subplot(2,m,4);
+    subplot(2,4,4);
     scale = Nsave(1:clock, 3);
     set(hS4, 'XData', tsave(1:clock), 'YData', Ssave(1:clock, 3) ./ scale);
     set(hI4, 'XData', tsave(1:clock), 'YData', Isave(1:clock, 3) ./ scale);
     set(hR4, 'XData', tsave(1:clock), 'YData', Rsave(1:clock, 3) ./ scale);
     %set(hD4, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3) ./ scale);
     
-    subplot(2,m,5);
+    subplot(2,4,5);
     set(hU, 'XData',  tsave(1:clock), 'YData', Usave(1:clock));
     set(hV, 'XData',  tsave(1:clock), 'YData', Vsave(1:clock));
     set(hQ, 'XData',  tsave(1:clock), 'YData', Qsave(1:clock));
 
-    subplot(2,m,6);
+    subplot(2,4,6);
     set(hN, 'XData',  tsave(1:clock), 'YData', sum(Nsave(1:clock, :), 2));
     set(hND, 'XData',  tsave(1:clock), 'YData', NDsave(1:clock));
     set(hNB, 'XData',  tsave(1:clock), 'YData', NBsave(1:clock));
 
-    subplot(2,m,8);
+    subplot(2,4,7);
     set(hTC, 'XData',  tsave(1:clock), 'YData', QCsave(1:clock) + VCsave(1:clock));
     set(hQC, 'XData',  tsave(1:clock), 'YData', QCsave(1:clock));
     set(hVC, 'XData',  tsave(1:clock), 'YData', VCsave(1:clock));
 
-    subplot(2,m,7);
+    subplot(2,4,8);
     axis([0, tmax/month, 0, sum(D)*1.05]);
     set(hDT, 'XData',  tsave(1:clock), 'YData', NDsave(1:clock));
     set(hDU, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 1));
     set(hDV, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 3));
     set(hDQ, 'XData', tsave(1:clock), 'YData', Dsave(1:clock, 2));
 
-    subplot(2,m,9);
+    subplot(2,4,9);
     set(hCTC, 'XData',  tsave(1:clock), 'YData', CQCsave(1:clock) + CVCsave(1:clock));
     set(hCQC, 'XData',  tsave(1:clock), 'YData', CQCsave(1:clock));
     set(hCVC, 'XData',  tsave(1:clock), 'YData', CVCsave(1:clock));
