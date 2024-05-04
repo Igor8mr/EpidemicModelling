@@ -17,7 +17,7 @@ dt = tmax/clockmax ;% Calculates the duration of each time step.
 vDevelopTime = 10 * month;
 vDevelopCost = 31 * (10 ^ 9) / vDevelopTime;
 vCostPerDose = 20;
-qDailyCostI = 400/day;
+qDailyCostI = 70/day;
 qDailyCostH = 50/day;
 
 A           = 0.85/month; 
@@ -38,7 +38,7 @@ deltaVI     = 0.051 / month;         % https://www.ncbi.nlm.nih.gov/pmc/articles
 deltaI      = [deltaUI, deltaVI, deltaUI]; % Death rate for infected individuals
 
 vr          = 0.1 /month;       % Vaccination rate % https://usafacts.org/visualizations/covid-vaccine-tracker-states/
-qr          = 0.05/month;        % Quarantine rate
+qr          = .01/month;        % Quarantine rate
 
 intialI = 0.5 * (10^6);
 initialN = 335 * (10^6) + intialI; % https://census.gov/quickfacts/fact/table/US/PST045221
@@ -77,7 +77,7 @@ CQCsave = zeros(clockmax, 1);
 
 
 %% Create the figure and subplots
-figure('NumberTitle','off', 'Name', [' vr ' num2str(vr*month) 'rq' num2str(vr*month)]);
+figure('NumberTitle','off', 'Name', [' vr ' num2str(vr*month) 'qr' num2str(qr*month)]);
 
 subplot(2,m,1);
 hold on
